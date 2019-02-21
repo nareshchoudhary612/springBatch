@@ -68,7 +68,7 @@ public class BatchConfiguration {
  /*************************************************************************/
  // 				READER	
  /*************************************************************************/
- /*@Bean
+ @Bean
  public StaxEventItemReader<EntitlementEntity> reader(){
   StaxEventItemReader<EntitlementEntity> reader = new StaxEventItemReader<EntitlementEntity>();
   reader.setResource(new ClassPathResource("ee.xml"));
@@ -83,7 +83,7 @@ public class BatchConfiguration {
   reader.setUnmarshaller(xStreamMarshaller);
   
   return reader;
- }*/
+ }
  
  /*************************************************************************/
  // 				PROCESSOR	
