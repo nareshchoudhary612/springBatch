@@ -3,6 +3,7 @@ package springbatch_example.SpringBatchXmlToDatabase;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManagerFactory;
@@ -15,9 +16,14 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.ParseException;
+import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.batch.item.database.ItemPreparedStatementSetter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +32,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.oxm.xstream.XStreamMarshaller;
 
+import springbatch_example.SpringBatchXmlToDatabase.DAOService.DiaryDAO;
 import springbatch_example.SpringBatchXmlToDatabase.DAOService.EntitlementDAO;
+import springbatch_example.SpringBatchXmlToDatabase.model.DiaryEntity;
 import springbatch_example.SpringBatchXmlToDatabase.model.EntitlementEntity;
 
 
@@ -49,6 +57,15 @@ public class BatchConfiguration {
  @Autowired
  EntitlementDAO entitlementDAO;
  
+ @Autowired
+ DiaryEntity diaryDAO;
+ 
+ @Autowired
+ DiaryEntity diaryEntity;
+ 
+ /*@Autowired
+ EntitlementEntity entitlementEntity;*/
+ 
  
  /**************Not required after adding JPA******************************/
  /*@Bean
@@ -68,7 +85,9 @@ public class BatchConfiguration {
  /*************************************************************************/
  // 				READER	
  /*************************************************************************/
- @Bean
+ /*
+  * Reading from XML
+  * @Bean
  public StaxEventItemReader<EntitlementEntity> reader(){
   StaxEventItemReader<EntitlementEntity> reader = new StaxEventItemReader<EntitlementEntity>();
   reader.setResource(new ClassPathResource("ee.xml"));
@@ -83,17 +102,51 @@ public class BatchConfiguration {
   reader.setUnmarshaller(xStreamMarshaller);
   
   return reader;
+ }*/
+ 
+ /** Reading from MySQL **/
+ @Bean
+ public JpaPagingItemReader<DiaryEntity> demoJobReader()  {
+     String jpqlQuery = "select d from DiaryEntity d where status ='NSNG'";
+     JpaPagingItemReader<DiaryEntity> reader = new JpaPagingItemReader<>();
+     reader.setQueryString(jpqlQuery);
+     reader.setEntityManagerFactory(emf);
+     reader.setPageSize(1000);
+    
+		try{
+//			System.out.println(reader.read().getAmount());
+		}
+		catch( Exception e){
+			e.printStackTrace();
+		}
+	
+     try {
+		reader.afterPropertiesSet();
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+		
+	}
+     
+     reader.setSaveState(true);
+
+     return reader;
  }
  
  /*************************************************************************/
  // 				PROCESSOR	
  /*************************************************************************/
- @Bean
- public ItemProcessor<EntitlementEntity, EntitlementEntity> processor() {
+ /*@Bean
+ public ItemProcessor<DiaryEntity, DiaryEntity> processor() {  //Parameters-> I,O
      return (item) -> {
-         item.setDiaryId(item.getDiaryId() +1); 
+         item.setDiaryNo(9); 
+         System.out.println(item.getAmount());
          return item;
      };
+ }*/
+ @Bean
+ public ItemProcessor<DiaryEntity, List<EntitlementEntity>> customprocessor() {
+     return new entGenProcessor();
  }
  
  /*************************************************************************/
@@ -119,12 +172,23 @@ public class BatchConfiguration {
  
  
  @Bean
+ public ItemWriter<List<EntitlementEntity>> writer() {
+ //    JpaItemWriter writer = new JpaItemWriter();
+ //    writer.setEntityManagerFactory(emf);
+//	 EntGenWriter egw = new EntGenWriter(null);
+     return new EntGenWriter();
+ }
+ 
+ /*@Bean
  public JpaItemWriter writer() {
      JpaItemWriter writer = new JpaItemWriter();
      writer.setEntityManagerFactory(emf);
      return writer;
- }
+ }*/
  
+ /*public ItemWriter<DiaryEntity, List<EntitlementEntity>> processor() {
+     return new entGenProcessor();
+ }*/
  
  
  /*************************************************************************/
@@ -133,9 +197,9 @@ public class BatchConfiguration {
  @Bean
  public Step step1() {
   return stepBuilderFactory.get("step1")
-    .<EntitlementEntity, EntitlementEntity> chunk(10)
-    .reader(reader())
-    .processor(processor())
+    .<DiaryEntity, List<EntitlementEntity>> chunk(10)
+    .reader(demoJobReader())
+    .processor(customprocessor())
     .writer(writer())
     .build();
  }

@@ -29,30 +29,77 @@ public class EntitlementEntity {
 	@Column(name="payCurrency")
 	private String payCurrency;
 	
+	@Column(name="accountCurrency")
+	private String accountCurrency;
+	
 	@Column(name="units")
-	private String units;
+	private float units;
 	
 	@Column(name="perUnitAmount")
-	private String perUnitAmount;
+	private float perUnitAmount;
 	
 	@Column(name="totalDividendAmount")
-	private String totalDividendAmount;
+	private float totalDividendAmount;
 	
 	public EntitlementEntity() {
 		
 	}
 
-	public EntitlementEntity(int entitlementId, int diaryId, String customerId, String accountId, String payCurrency,
-			String units, String perUnitAmount, String totalDividendAmount) {
+	
+	
+	public EntitlementEntity(int entitlementId, int diaryId, String customerId, String accountId, String portfolioId,
+			String payCurrency, String accountCurrency, float units, float perUnitAmount, float totalDividendAmount) {
 		super();
 		this.entitlementId = entitlementId;
 		this.diaryId = diaryId;
 		this.customerId = customerId;
 		this.accountId = accountId;
+		this.portfolioId = portfolioId;
 		this.payCurrency = payCurrency;
+		this.accountCurrency = accountCurrency;
 		this.units = units;
 		this.perUnitAmount = perUnitAmount;
 		this.totalDividendAmount = totalDividendAmount;
+	}
+
+
+
+
+
+	public String getAccountCurrency() {
+		return accountCurrency;
+	}
+
+
+
+
+
+	public void setAccountCurrency(String accountCurrency) {
+		this.accountCurrency = accountCurrency;
+	}
+
+
+
+
+
+	public float getUnits() {
+		return units;
+	}
+
+
+
+
+
+	public String getPortfolioId() {
+		return portfolioId;
+	}
+
+	public void setPortfolioId(String portfolioId) {
+		this.portfolioId = portfolioId;
+	}
+
+	public void setUnits(float units) {
+		this.units = units;
 	}
 
 	public int getEntitlementId() {
@@ -95,27 +142,20 @@ public class EntitlementEntity {
 		this.payCurrency = payCurrency;
 	}
 
-	public String getUnits() {
-		return units;
-	}
 
-	public void setUnits(String units) {
-		this.units = units;
-	}
-
-	public String getPerUnitAmount() {
+	public float getPerUnitAmount() {
 		return perUnitAmount;
 	}
 
-	public void setPerUnitAmount(String perUnitAmount) {
+	public void setPerUnitAmount(float perUnitAmount) {
 		this.perUnitAmount = perUnitAmount;
 	}
 
-	public String getTotalDividendAmount() {
+	public float getTotalDividendAmount() {
 		return totalDividendAmount;
 	}
 
-	public void setTotalDividendAmount(String totalDividendAmount) {
+	public void setTotalDividendAmount(float totalDividendAmount) {
 		this.totalDividendAmount = totalDividendAmount;
 	}
 	
